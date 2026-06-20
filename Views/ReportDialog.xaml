@@ -1,0 +1,100 @@
+<Window x:Class="InspectionApp.Views.ReportDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Inspection Reports"
+        Width="660"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="White">
+    <Border BorderBrush="{StaticResource AccentBrush}" BorderThickness="3" Padding="28">
+        <StackPanel>
+
+            <!-- Header -->
+            <TextBlock x:Name="DialogHeader" Text="INSPECTION REPORTS"
+                       FontSize="24" FontWeight="Bold"
+                       Foreground="{StaticResource AccentBrush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,24"/>
+
+            <!-- Filter grid -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Part Number -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Part Number:"
+                           FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
+                           Margin="0,0,0,12"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" x:Name="PartNumberCombo"
+                          Style="{StaticResource FloatingComboBoxStyle}"
+                          Height="40" Margin="0,0,0,12"
+                          SelectionChanged="PartNumberCombo_SelectionChanged"/>
+
+                <!-- Shift -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Shift:"
+                           FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
+                           Margin="0,0,0,12"/>
+                <ComboBox Grid.Row="1" Grid.Column="1" x:Name="ShiftCombo"
+                          Style="{StaticResource FloatingComboBoxStyle}"
+                          Height="40" Margin="0,0,0,12"
+                          ToolTip="Select a shift to filter, or leave on (All)"/>
+
+                <!-- Auditor -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Auditor:"
+                           FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
+                           Margin="0,0,0,12"/>
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="AuditorFilter"
+                         Height="40" FontSize="15" Margin="0,0,0,12"
+                         Style="{StaticResource StandardTextBoxStyle}"
+                         ToolTip="Leave blank to include all auditors"/>
+
+                <!-- From Date -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="From Date:"
+                           FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
+                           Margin="0,0,0,12"/>
+                <DatePicker Grid.Row="3" Grid.Column="1" x:Name="FromDatePicker"
+                            FontSize="15" Height="40" Margin="0,0,0,12"
+                            VerticalContentAlignment="Center"/>
+
+                <!-- To Date -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="To Date:"
+                           FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <DatePicker Grid.Row="4" Grid.Column="1" x:Name="ToDatePicker"
+                            FontSize="15" Height="40"
+                            VerticalContentAlignment="Center"/>
+            </Grid>
+
+            <!-- Status text -->
+            <TextBlock x:Name="StatusBlock"
+                       FontSize="14"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,20"
+                       Text="Select filters and click Open to generate an Excel report."/>
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Open Report"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        FontSize="16" Height="46" Padding="28,0"
+                        Margin="0,0,12,0"
+                        Click="OpenReport_Click"/>
+                <Button Content="Close"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        FontSize="16" Height="46" Padding="24,0"
+                        Click="Close_Click"/>
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</Window>
