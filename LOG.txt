@@ -1,0 +1,112 @@
+================================================================================
+  InspectionApp - DEVELOPMENT LOG
+================================================================================
+Project : Industrial Inspection System (.NET 8 WPF desktop application)
+Purpose : Quality inspection & PPAP data entry, SQLite storage, Excel reports.
+Repo    : https://github.com/ZAZAEMON/InspectionApp   (private)
+Log date: 2026-06-20
+
+This log summarises the work done across our sessions: a series of UI/UX fixes,
+a report-generation bug fix, and putting the project under version control on
+GitHub. Each entry lists the symptom, the underlying cause, the fix applied and
+the files touched. Every code change compiled cleanly (dotnet build: 0 errors).
+
+--------------------------------------------------------------------------------
+1. TOP-RIGHT TOOLBAR OVERLAP  (Shift / Auditor under the window buttons)
+--------------------------------------------------------------------------------
+Symptom : In the PPAP toolbar the "Auditor" text box overlapped the custom
+          window caption buttons (minimize / maximize / close) at the very
+          top-right, looking squashed and distorted.
+Cause   : MainWindow floats its own caption buttons (3 x 46px = 138px wide) on
+          top of the top-right corner of every hosted view. The PPAP and Home
+          toolbars docked their Shift + Auditor group to the right edge with
+          only an 8px margin, so the box slid underneath those buttons.
+Fix     : Reserved the caption-button width on the right of those toolbars -
+          right margin changed from "0,0,8,0" to "0,0,146,0" (138px + 8px gap).
+Files   : Views/PPAPView.xaml
+          Views/HomeView.xaml   (same latent bug, fixed at the same time)
+
+--------------------------------------------------------------------------------
+2. TOOLBAR BUTTONS HARD TO CLICK  +  TOP TEXT CUT OFF (when maximized)
+--------------------------------------------------------------------------------
+Symptom A: Toolbar buttons (Menu, Select Part Type, Report, Add, ...) only
+           responded to clicks on a thin strip near their bottom edge.
+Cause  A : The WindowChrome caption height is 32px; that top strip is a drag
+           region that swallows mouse clicks. The toolbars sit directly under
+           it, so only the part of each button below 32px was clickable.
+Fix    A : Marked the interactive toolbar controls as hit-test-visible in the
+           window chrome:
+             - WindowChrome.IsHitTestVisibleInChrome="True" added to the shared
+               ToolbarButtonStyle (fixes every toolbar button app-wide), and
+             - the same on the Shift dropdown and Auditor box in PPAP and Home.
+           Empty toolbar areas stay draggable, so the window can still be moved.
+
+Symptom B: The top of the toolbar text was shaved off when the window was
+           maximized.
+Cause  B : A maximized WindowChrome window overflows the monitor edges by the
+           resize-border thickness, pushing the top ~8px of content off-screen.
+Fix    B : Added a WM_GETMINMAXINFO hook that constrains the maximized window to
+           the monitor work area (fills the screen exactly, respects the
+           taskbar, no clipping, no stray border).
+Files   : App.xaml              (ToolbarButtonStyle)
+          Views/PPAPView.xaml   (Shift / Auditor controls)
+          Views/HomeView.xaml   (Shift / Auditor controls)
+          MainWindow.xaml.cs    (WM_GETMINMAXINFO hook + interop structs)
+
+--------------------------------------------------------------------------------
+3. "PART LOADER" SEARCH BOX TEXT CLIPPED  (Product Audit view)
+--------------------------------------------------------------------------------
+Symptom : Text in the part-search box on the Product Audit screen was cut off
+          at the top and bottom.
+Cause   : The box was Height=30, but StandardTextBoxStyle adds 5px top/bottom
+          padding plus a border (which grows to 2px on focus), leaving only
+          ~16px of room for a 12px font line.
+Fix     : Enlarged the box - Height 30 -> 40 and FontSize 12 -> 14 - giving the
+          text comfortable vertical room.
+Files   : Views/HomeView.xaml
+
+--------------------------------------------------------------------------------
+4. PPAP "ALL PARTS" REPORT - PARAMETERS MISALIGNED ACROSS PARTS
+--------------------------------------------------------------------------------
+Symptom : When exporting a PPAP report covering all parts, every part showed the
+          SAME parameter list and the readings did not line up with the correct
+          parameters. Each part actually has a different set (and a different
+          number) of parameters.
+Cause   : The export merged every session into ONE shared "Parameter" column,
+          grouping all readings by serial number only and labelling each row
+          with the first part's parameter name. Other parts' readings were then
+          forced onto those rows by position.
+Fix     : Reworked the Excel export so a multi-part report renders ONE stacked
+          block per part, each self-contained:
+             - a part banner  ("Part: <no>   (N session(s))")
+             - its own header row with that part's sessions as columns
+             - its own parameters as the rows
+          Blocks are stacked vertically with a spacer between them. Single-part
+          reports are unchanged.
+Files   : Services/ExcelExportService.cs
+
+--------------------------------------------------------------------------------
+5. VERSION CONTROL + GITHUB
+--------------------------------------------------------------------------------
+- Added a .NET-appropriate .gitignore. Kept OUT of the repo: build output
+  (bin/, obj/, publish/), the runtime SQLite database, exported reports
+  (InspectionReports/), user backgrounds (Backgrounds/), app_settings.txt,
+  local tooling (.claude/) and scratch logs.
+- Initialised a git repository on branch "main".
+- Initial commit e9f7fd6 - 37 source files, no build artifacts.
+- Created and pushed to a PRIVATE GitHub repository:
+      https://github.com/ZAZAEMON/InspectionApp
+- Note: the history is a single current-state snapshot (the project was not
+  under git while the work above was done); future changes can be committed
+  step-by-step.
+
+--------------------------------------------------------------------------------
+PENDING / REQUESTED  (not yet implemented)
+--------------------------------------------------------------------------------
+- Auto-scroll in the PPAP table: keep the newly added row in view when rows are
+  added, and follow the caret while moving through the parameter / reading cells
+  with the Enter key. This was the original request and is still open.
+
+================================================================================
+End of log.
+================================================================================
